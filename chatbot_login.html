@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UNIZULU AssetManager</title>
+  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #002147;
+      --accent: #ffd100;
+      --background: #f4f6f8;
+      --white: #fff;
+      --danger: #d7263d;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('background.png') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Overlay and layout for screens */
+    .screen, #dashboard {
+      display: none;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      color: var(--white);
+      position: relative;
+    }
+
+    /* Add gradient overlay to improve text readability */
+    .screen::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(120deg, rgba(0,33,71,0.85) 70%, rgba(255,209,0,0.3) 100%);
+      z-index: 0;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      border-radius: 12px;
+      width: 320px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .card h2 {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .card .logo {
+      width: 70px;
+      margin-bottom: 1rem;
+    }
+
+    .card input {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .card button {
+      width: 100%;
+      padding: 0.7rem;
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .card button:hover {
+      background: var(--accent);
+      color: var(--primary);
+    }
+
+    .choice-buttons button {
+      margin: 0.5rem;
+      padding: 1rem 2rem;
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .choice-buttons button:hover {
+      background: var(--accent);
+      color: var(--primary);
+    }
+
+    #dashboard {
+      flex: 1;
+      flex-direction: row;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background: rgba(255,255,255,0.8);
+      color: #333;
+      position: relative;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Step 1: Role Selection -->
+  <div id="role-screen" class="screen active">
+    <div class="card">
+      <img src="logo.png" alt="UNIZULU Logo" class="logo" />
+      <h2>Workflow Automation for University-Issued Asset Management</h2>
+      <p>Are you a Staff member or ICT member?</p>
+      <div class="choice-buttons">
+        <button id="staffBtn">Staff</button>
+        <button id="ictBtn">ICT</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: ICT Login -->
+  <div id="ict-login" class="screen">
+    <div class="card">
+      <img src="logo.png" alt="UNIZULU Logo" class="logo" />
+      <h2>ICT Member Login</h2>
+      <form id="ict-form">
+        <input type="text" id="ict-id" placeholder="Enter Identification" required/>
+        <input type="password" id="ict-password" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+      <div id="ict-status" style="margin-top:10px; font-weight:bold;"></div>
+    </div>
+  </div>
+
+  <!-- Step 2: Staff Login -->
+  <div id="staff-login" class="screen">
+    <div class="card">
+      <img src="logo.png" alt="UNIZULU Logo" class="logo" />
+      <h2>Staff Member Login</h2>
+      <form id="staff-form">
+        <input type="text" id="staff-id" placeholder="Staff ID" required />
+        <input type="password" id="staff-password" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+      <div id="staff-status" style="color: red; margin-top: 8px;"></div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 University of Zululand. AssetManager. All rights reserved.
+  </footer>
+
+  <!-- Supabase and Logic -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const SUPABASE_URL = "https://gztfganvhyhvqrxeumvj.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dGZnYW52aHlodnFyeGV1bXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4NDI5NjMsImV4cCI6MjA3NzQxODk2M30.9jEe1IS-ObafAtPAU-DhuWI1RaSGIKuqovoURn6YOEI";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const ICT_WEBHOOK = "https://mzelemu.app.n8n.cloud/webhook/499666c3-d807-4bb7-8195-43932f64a91f/chat";
+    const STAFF_WEBHOOK = "https://mzelemu.app.n8n.cloud/webhook/f8859f39-6714-4454-bda8-6a780e8f4730/chat";
+
+    const roleScreen = document.getElementById('role-screen');
+    const ictLogin = document.getElementById('ict-login');
+    const staffLogin = document.getElementById('staff-login');
+
+    // Role selection
+    document.getElementById('ictBtn').addEventListener('click', () => {
+      roleScreen.classList.remove('active');
+      ictLogin.classList.add('active');
+    });
+
+    document.getElementById('staffBtn').addEventListener('click', () => {
+      roleScreen.classList.remove('active');
+      staffLogin.classList.add('active');
+    });
+
+    // ICT Login
+    document.getElementById('ict-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const identification = document.getElementById('ict-id').value.trim();
+      const password = document.getElementById('ict-password').value.trim();
+      const statusDiv = document.getElementById('ict-status');
+      statusDiv.style.color = "black";
+      statusDiv.textContent = "Checking credentials...";
+
+      try {
+        const { data, error } = await supabase
+          .from('ict_credetials')
+          .select('*')
+          .eq('identification', identification)
+          .eq('password', password)
+          .single();
+
+        if (error || !data) {
+          statusDiv.style.color = "red";
+          statusDiv.textContent = "Invalid Identification or Password.";
+          return;
+        }
+
+        await supabase.from('login_sessions').insert([{
+          username: data.full_name || data.identification,
+          role: 'ict',
+          browser_info: navigator.userAgent
+        }]);
+
+        statusDiv.style.color = "green";
+        statusDiv.textContent = "Login successful! Redirecting...";
+
+        setTimeout(() => {
+          const qp = new URLSearchParams({ username: data.full_name || data.identification, role: 'ict' });
+          const url = ICT_WEBHOOK + (ICT_WEBHOOK.includes('?') ? '&' : '?') + qp.toString();
+          window.location.href = url;
+        }, 1200);
+
+      } catch (err) {
+        console.error("Error:", err);
+        statusDiv.style.color = "red";
+        statusDiv.textContent = "Error connecting to database.";
+      }
+    });
+
+    // Staff Login
+    document.getElementById('staff-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const staffID = document.getElementById('staff-id').value.trim();
+      const password = document.getElementById('staff-password').value.trim();
+      const statusDiv = document.getElementById('staff-status');
+      statusDiv.style.color = "black";
+      statusDiv.textContent = "Checking credentials...";
+
+      try {
+        const { data, error } = await supabase
+          .from('password')
+          .select('*')
+          .eq('staff_id', staffID)
+          .eq('password', password)
+          .single();
+
+        if (error || !data) {
+          statusDiv.style.color = "red";
+          statusDiv.textContent = "Invalid Staff ID or Password.";
+          return;
+        }
+
+        await supabase.from('login_sessions').insert([{
+          username: data.full_name || data.staff_id,
+          role: 'staff',
+          browser_info: navigator.userAgent
+        }]);
+
+        statusDiv.style.color = "green";
+        statusDiv.textContent = "Login successful! Redirecting...";
+
+        setTimeout(() => {
+          const qp = new URLSearchParams({ username: data.full_name || data.staff_id, role: 'staff' });
+          const url = STAFF_WEBHOOK + (STAFF_WEBHOOK.includes('?') ? '&' : '?') + qp.toString();
+          window.location.href = url;
+        }, 1200);
+
+      } catch (err) {
+        console.error("Error:", err);
+        statusDiv.style.color = "red";
+        statusDiv.textContent = "Error connecting to database.";
+      }
+    });
+  </script>
+</body>
+</html>
