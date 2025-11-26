@@ -1,0 +1,225 @@
+{
+  "name": "Assigned Staff",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hello staff member. I am your AI assistant, here to help you with any asset related questions",
+        "options": {
+          "inputPlaceholder": "Type your message here..",
+          "showWelcomeScreen": false,
+          "subtitle": "Staff Asset Support",
+          "title": "University Asset Management",
+          "customCss": ".chat-header {\n  display: flex;\n  justify-content: left; /* keeps title centered */\n  align-items: left;\n  position: relative;\n  padding: 20px;\n  font-size: 1.6rem;\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: 1px;\n  color: white;\n\n  /* Background updated */\n  background-color: #0c0f1a  !important; \n  border-bottom: 3px solid #0a0f1a;\n}\n\n/* Logo box on the right */\n.chat-header::after {\n  content: \"\";\n  background: url(\"https://i.ytimg.com/vi/mkC3XDELR70/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBwkv0nuPvwa39Hnj1ozhtGRK6wpQ\") no-repeat center;\n  background-size: contain; /* ensures logo scales nicely */\n  position: absolute;\n  right: 0px;\n  top: 50%;\n  transform: translateY(-50%);\n  height: 300px;\n  width: 300px;\n  border-radius: 8px;\n  background-color: #0a0f1a; /* blends with header */\n  box-shadow: 0 2px 8px rgba(0,0,0,0.25);\n}\n\n/* === USER BUBBLE === */\n.chat-message.is-user {\n  background: #001440 !important; /* brand blue */\n  color: #fff;\n  border-radius: 12px 12px 0 12px;\n  max-width: 70%;\n  padding: 12px 16px;\n  margin: 8px 0 8px auto; /* push right */\n}\n\n/* === BOT BUBBLE === */\n.chat-message.is-bot {\n  background: #f3f6fc  ; /* soft gray-blue */\n  color: #0e182e; /* updated text colour */\n  border: 1px solid rgba(0,0,0,0.05);\n  border-radius: 12px 12px 12px 0;\n  max-width: 70%;\n  padding: 12px 16px;\n  margin: 8px auto 8px 0; /* push left */\n}\n\n/* === HOVER GLOW === */\n.chat-message {\n  transition: transform 0.2s ease, box-shadow 0.2s ease;\n}\n.chat-message:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);\n}\n\n/* === FOOTER / INPUT BOX === */\n.chat-footer input {\n  border: 1px solid #d1d5db;\n  border-radius: 8px;\n  padding: 10px 14px;\n  font-size: 1rem;\n  width: 85%;\n  outline: none;\n  transition: border 0.2s ease;\n}\n.chat-footer input:focus {\n  border: 1px solid #2563eb;\n  box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);\n}\n\n/* Send button (if enabled) */\n.chat-footer button {\n  background: #060072;\n  color: white;\n  border: none;\n  border-radius: 8px;\n  padding: 10px 14px;\n  margin-left: 8px;\n  cursor: pointer;\n  font-weight: 600;\n  transition: background 0.2s ease;\n}\n.chat-footer button:hover {\n  background: #1e3a8a;\n}\n",
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "37d0e399-31ff-4a27-8c92-1f38027bedb2",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "Public interface",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "creator": "Lucas Peyrin",
+      "position": [
+        -160,
+        -16
+      ],
+      "webhookId": "f8859f39-6714-4454-bda8-6a780e8f4730",
+      "typeVersion": 1.1,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        336,
+        256
+      ],
+      "id": "a6cbb925-1f80-444e-81e3-e082b1af6d26",
+      "name": "Send mail",
+      "webhookId": "4c266737-9ab3-4c8d-8669-e74c718bfbaf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "oDnHSW5wDFohecVH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        272
+      ],
+      "id": "90fdea4c-6606-4f96-9e42-7b93e4c73921",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CS2Tj7lmu53F2aTF",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an AI assistant for managing University of Zululand asset records.\nThe current date is {{ $json.currentDate }} (use this for date references).\n\nGreet warmly(with they're name): \n\"Hello! I’m your asset management assistant for staff members. {{ $fromTool('Session ID', 'username', 'string') }}!\"\n\n\nSession Handling:\nWhen the user starts the chat, automatically use the “Session ID” tool to identify the most recent login session from Supabase.  \nRetrieve the record with the latest `login_time` and verify that the `role` in that record is set to \"staff\".  \nThen Give them your capabilites of assisting them\n\nAssigned Staff can:\n\nView records of assets issued to them.\n\nReport a failing device (after troubleshooting).\n\nRequest troubleshooting assistance for a failing device.\n\n\n\nCapabilities:\n\nReport Failing Device & Troubleshooting:\n\nVerify Asset ID: Use the View Data Tool with \"Asset ID\" and confirm the verification by mentioning the asset but the asset should only if it belongs to them. If not found, reply: \"The Asset ID provided does not belong to the institution. Please check the details and try again.\" Stop if not verified.\n\nCollect Problem Description: Ask the user, \"Please describe the problem you are experiencing with this asset.\" Store this description for troubleshooting and escalation emails.\n\nGenerate Troubleshooting Steps: Use the description to provide 2–3 actionable steps. Example: \"For a laptop that crashes, try restarting it, checking for overheating, or running updates.\" End with: \"Please try these steps. If the issue persists, let me know and I can escalate this to the ICT Team.\"\n\nEscalation via Send Mail Tool: If troubleshooting fails and the user confirms, send an email using the Send Mail Tool to mlulekinkosi@icloud.com\n\n-Assigned Staff can:\n\nView all records of assets issued to them(using View Data tool)\n\nReport a failing device (after troubleshooting).\n\nRequest troubleshooting assistance for a failing device.\n\n-Capabilities\n\n\nReport Failing Device & Troubleshooting:\n\nVerify Asset ID: Use the View Data Tool with \"Asset ID\". If not found, reply: \"The Asset ID provided does not belong to the institution. Please check the details and try again.\" Stop if not verified.\n\nCollect Problem Description: Ask the user, \"Please describe the problem you are experiencing with this asset.\" Store this description for troubleshooting and escalation emails.\n\nGenerate Troubleshooting Steps: Use the description to provide 2–3 actionable steps. Example: \"For a laptop that crashes, try restarting it, checking for overheating, or running updates.\" End with: \"Please try these steps. If the issue persists, let me know and I can escalate this to the ICT Team.\"\n\nEscalation via Send Mail Tool: If troubleshooting fails and the user confirms, send an email using the Send Mail Tool to mlulekimzelemu306@gmail.com. Use the problem description and the user personal details  to generate  subject and body for the email to the ICT team.\n- The email must automatically include(Use the view data tool to capture these details):\n  - Staff full name, Staff Number, and department \n  - Asset ID\n  - Problem description\n  - Troubleshooting steps tried\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        -16
+      ],
+      "id": "016531c6-e2b4-4721-9988-c025b18f9b5a",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "UNIZULU"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        112,
+        272
+      ],
+      "id": "fdca9e65-0635-4c01-b594-4128a555734e",
+      "name": "view data",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Ls5J6km692pjzovW",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "login_sessions"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        240,
+        256
+      ],
+      "id": "3c0719ff-9f98-43d5-bf52-8986c8e997ba",
+      "name": "Session ID",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Ls5J6km692pjzovW",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        272
+      ],
+      "id": "5061c022-e22b-43e4-89ed-86ac769ef67a",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Public interface": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send mail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        []
+      ]
+    },
+    "view data": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Session ID": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c47cf3e5-d57f-4704-bbaa-e7181704c99b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6529fd478dd36082d19685fb56705058c65a8251fddd91b668e0859e7ac2fac"
+  },
+  "id": "8XVJDFB8RTDeLl9S",
+  "tags": []
+}

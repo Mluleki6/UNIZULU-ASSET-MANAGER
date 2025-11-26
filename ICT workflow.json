@@ -1,0 +1,397 @@
+{
+  "name": "ICT workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=\nYou are an AI assistant for managing University of Zululand asset records.\nThe current date is {{ $json.currentDate }} (use this for date references).\n\nWhen the user starts the chat, automatically use the “Session ID” tool to identify the most recent login session f.  \nRetrieve the record with the latest `login_time` and verify that the `role` in that record is set to \"ict\".\nGreet warmly(with they're name): \nThen Give them your capabilites of assisting them\n\n-As an ICT Member you can:\n\n-View all or filtered asset records.\n\nAdd or update records.\n\n-Capabilities:\n\n-Adding New Records:\n\nWhen the user requests to add a new record of an assigned staff, ask them to provide the following details :\n\n-Asset ID\n-Assigned Staff (full name)\n-Staff Number\n-Department\n-Asset Name\n-Asset Category\n-Issue Date (YYYY-MM-DD)\n-Expected Return Date (YYYY-MM-DD)\n-Condition\n-Maintenance Needed (Yes/No)\n-Notes(Optional)\n-Email Address\n\nOnce all the above details are provided, prepare the data(exact details provided by the user) in structured JSON format and add them in the \"Add or Update\" tool.\n\n-Updating Records:\n\nIf the user requests to update records, use the Asset ID they provide to fetch the records related to them using the View Data tool.\n\nPresent the current record and ask the user which fields they would like to change.\n\nKeep unchanged fields as they are unless specified.\nOnly change fields specified by the user\n\n-Escalating an Email via Changes Mail Tool:\n\nWhen new records of an assigned staff have been added, send an email notifying them of the new assignment and include all current asset records related to them. Use the email address they provided , include the Full Name of the ICT member performed the actions.\n\nIf records of an assigned staff have been modified, notify them using the Changes Mail tool about the changes and include their current asset records. Use the email address in their records include the Full Name of the ICT member performed the actions(retrieved via the View Data tool).",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        48
+      ],
+      "id": "e7a760d1-aaf6-4647-92d6-f69d40bd7847",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        576,
+        496
+      ],
+      "id": "76753533-a1f6-45fc-8587-6571615a1361",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CS2Tj7lmu53F2aTF",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "This Gmail node is responsible for notifying assigned staff members via email whenever there is a change in the asset management system.\n\nBehavior:\n\nNew Asset Issued\n\nWhen a staff member is issued a new asset, the Gmail node will send an email notification.\n\nThe recipient email address must be taken from the \"Assigned Staff Email\" field in Google Sheets (provided by the staff member when their details were recorded).\n\nRecord Updated\n\nWhen a staff member’s asset record is updated (asset returned, condition changed, maintenance logged, or notes added), send an email notification summarizing the update.\n\nThe recipient must again be the email address provided in their staff details.\n\nNo Email Case\n\nIf no valid email is found in the \"Assigned Staff Email\" field, the workflow should skip the Gmail node and log an error for review.",
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        848,
+        496
+      ],
+      "id": "3ab72480-3263-4038-99e8-dc18f0355252",
+      "name": "Changes Mail",
+      "webhookId": "507d7679-970d-41b5-acd4-bcaca9455997",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "oDnHSW5wDFohecVH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "UNIZULU"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        448
+      ],
+      "id": "5fe14e9b-7fe2-4142-b2f2-7e3513265917",
+      "name": "View Data",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Ls5J6km692pjzovW",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "UNIZULU",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "AssetID",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Assigned Staff",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Sfaff Number",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Department",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Asset Name",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Asset Category",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues5_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Issue Date",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues6_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Expected Date Return",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues7_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Condition",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues8_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Maintenance Needed",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues9_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Notes",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues10_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Email address",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues11_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        416
+      ],
+      "id": "5ecf912c-9fe1-415b-a88f-63b363352429",
+      "name": "Add",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Ls5J6km692pjzovW",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hello ICT member. I am your AI assistant, here to help you with any asset related questions",
+        "options": {
+          "inputPlaceholder": "Type your message here..",
+          "showWelcomeScreen": false,
+          "subtitle": "",
+          "title": "University Asset Management ",
+          "customCss": ".chat-header {\n  display: flex;\n  justify-content: left; /* keeps title centered */\n  align-items: left;\n  position: relative;\n  padding: 20px;\n  font-size: 1.6rem;\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: 1px;\n  color: white;\n\n  /* Background updated */\n  background-color: #0c0f1a  !important; \n  border-bottom: 3px solid #0a0f1a;\n}\n\n/* Logo box on the right */\n.chat-header::after {\n  content: \"\";\n  background: url(\"https://i.ytimg.com/vi/mkC3XDELR70/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBwkv0nuPvwa39Hnj1ozhtGRK6wpQ\") no-repeat center;\n  background-size: contain; /* ensures logo scales nicely */\n  position: absolute;\n  right: 0px;\n  top: 50%;\n  transform: translateY(-50%);\n  height: 300px;\n  width: 300px;\n  border-radius: 8px;\n  background-color: #0a0f1a; /* blends with header */\n  box-shadow: 0 2px 8px rgba(0,0,0,0.25);\n}\n\n/* === USER BUBBLE === */\n.chat-message.is-user {\n  background: #001440 !important; /* brand blue */\n  color: #fff;\n  border-radius: 12px 12px 0 12px;\n  max-width: 70%;\n  padding: 12px 16px;\n  margin: 8px 0 8px auto; /* push right */\n}\n\n/* === BOT BUBBLE === */\n.chat-message.is-bot {\n  background: #f3f6fc  ; /* soft gray-blue */\n  color: #0e182e; /* updated text colour */\n  border: 1px solid rgba(0,0,0,0.05);\n  border-radius: 12px 12px 12px 0;\n  max-width: 70%;\n  padding: 12px 16px;\n  margin: 8px auto 8px 0; /* push left */\n}\n\n/* === HOVER GLOW === */\n.chat-message {\n  transition: transform 0.2s ease, box-shadow 0.2s ease;\n}\n.chat-message:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);\n}\n\n/* === FOOTER / INPUT BOX === */\n.chat-footer input {\n  border: 1px solid #d1d5db;\n  border-radius: 8px;\n  padding: 10px 14px;\n  font-size: 1rem;\n  width: 85%;\n  outline: none;\n  transition: border 0.2s ease;\n}\n.chat-footer input:focus {\n  border: 1px solid #2563eb;\n  box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);\n}\n\n/* Send button (if enabled) */\n.chat-footer button {\n  background: #060072;\n  color: white;\n  border: none;\n  border-radius: 8px;\n  padding: 10px 14px;\n  margin-left: 8px;\n  cursor: pointer;\n  font-weight: 600;\n  transition: background 0.2s ease;\n}\n.chat-footer button:hover {\n  background: #1e3a8a;\n}\n",
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "fca28c8d-3383-43df-9572-4e4fea135205",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "Public interface",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "creator": "Lucas Peyrin",
+      "position": [
+        560,
+        48
+      ],
+      "webhookId": "499666c3-d807-4bb7-8195-43932f64a91f",
+      "typeVersion": 1.1,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "UNIZULU",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "AssetID",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "AssetID",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Assigned Staff",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Sfaff Number",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Department",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Asset Name",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Asset Category",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues5_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Issue Date",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues6_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Expected Date Return",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues7_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Condition",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues8_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Maintenance Needed",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues9_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Notes",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues10_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "Email address",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues11_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        432
+      ],
+      "id": "fd678ce2-86ac-47d6-b241-e2697020dac7",
+      "name": "Update",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Ls5J6km692pjzovW",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        736,
+        464
+      ],
+      "id": "5ea0195f-3dcc-4f67-86cc-85e9e8f1d514",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "login_sessions"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        944,
+        464
+      ],
+      "id": "03359498-c33c-485b-baf4-5bce78b3cc48",
+      "name": "Session ID",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Ls5J6km692pjzovW",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changes Mail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "View Data": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Public interface": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Session ID": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b1ce2c44-d0c3-4ea2-9012-b3fefb8c9dc7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6529fd478dd36082d19685fb56705058c65a8251fddd91b668e0859e7ac2fac"
+  },
+  "id": "ysZI0jP72CodA28e",
+  "tags": []
+}
